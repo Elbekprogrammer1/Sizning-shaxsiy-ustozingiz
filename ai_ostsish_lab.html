@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI O'sish Laboratoriyasi — Ustoz Platforma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0F1A;
+    --surface:#141B2E;
+    --surface2:#1C2540;
+    --line: rgba(255,255,255,0.08);
+    --teal:#22E6C5;
+    --teal-dim: rgba(34,230,197,0.14);
+    --gold:#F5B937;
+    --gold-dim: rgba(245,185,55,0.14);
+    --text:#EDEFF7;
+    --muted:#8D96AE;
+    --faint:#5B6480;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.55;}
+  .wrap{max-width:920px;margin:0 auto;padding:36px 20px 80px;}
+  h1,h2,h3{font-family:'Space Grotesk',sans-serif;font-weight:700;margin:0;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--teal);margin-bottom:8px;}
+  /* HERO */
+  .hero{padding:8px 0 32px;border-bottom:1px solid var(--line);margin-bottom:32px;}
+  .hero h1{font-size:30px;line-height:1.15;margin-bottom:10px;}
+  .hero p.tag{color:var(--muted);font-size:15px;max-width:520px;margin-bottom:20px;}
+  .daycount{display:flex;align-items:baseline;gap:10px;font-family:'JetBrains Mono',monospace;}
+  .daycount .num{font-size:34px;color:var(--gold);font-weight:500;}
+  .daycount .lbl{font-size:13px;color:var(--muted);}
+  .setup-row{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap;}
+  .setup-row label{font-size:12px;color:var(--muted);}
+  input[type=date],input[type=text],input[type=number]{background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:7px 10px;font-family:'Inter',sans-serif;font-size:13px;}
+  button{cursor:pointer;font-family:'Inter',sans-serif;}
+  /* SECTION */
+  section{margin-bottom:44px;}
+  .sec-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px;}
+  .sec-head h2{font-size:19px;}
+  .sec-note{color:var(--faint);font-size:12px;}
+  /* PHASES - orbit */
+  .orbit{display:flex;gap:0;position:relative;}
+  .phase{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;position:relative;margin-right:14px;}
+  .phase:last-child{margin-right:0;}
+  .phase .pnum{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--faint);margin-bottom:6px;}
+  .phase h3{font-size:15px;margin-bottom:4px;}
+  .phase .goal{font-size:12px;color:var(--gold);margin-bottom:14px;}
+  .bar-row{margin-bottom:10px;}
+  .bar-row .blabel{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px;}
+  .bar-track{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+  .bar-fill{height:100%;background:var(--teal);border-radius:3px;}
+  .bar-fill.gold{background:var(--gold);}
+  .phase-active{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal);}
+  .stepper{display:flex;align-items:center;gap:8px;margin-top:12px;}
+  .stepper button{width:24px;height:24px;border-radius:6px;background:var(--surface2);border:1px solid var(--line);color:var(--text);font-size:14px;}
+  .stepper button:active{transform:scale(0.94);}
+  .stepper .val{font-family:'JetBrains Mono',monospace;font-size:13px;min-width:50px;text-align:center;}
+  /* PILLARS */
+  .pillar-list{display:flex;flex-direction:column;gap:10px;}
+  .pillar{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;cursor:pointer;}
+  .pillar-top{display:flex;justify-content:space-between;align-items:center;}
+  .pillar-top .pname{font-size:14px;font-weight:500;}
+  .pillar-top .ppct{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--teal);}
+  .ptrack{height:6px;background:var(--surface2);border-radius:3px;margin-top:8px;overflow:hidden;}
+  .pfill{height:100%;background:var(--teal);border-radius:3px;}
+  .pdetail{max-height:0;overflow:hidden;transition:max-height 0.25s ease;font-size:12.5px;color:var(--muted);}
+  .pdetail ul{margin:10px 0 2px;padding-left:18px;}
+  .pillar.open .pdetail{max-height:160px;}
+  /* CHECKLIST */
+  .checklist{display:flex;flex-direction:column;gap:8px;}
+  .cl-item{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;}
+  .cl-item input[type=checkbox]{width:18px;height:18px;accent-color:var(--teal);flex-shrink:0;}
+  .cl-item .clname{font-size:13.5px;flex:1;}
+  .cl-item.done .clname{color:var(--faint);text-decoration:line-through;}
+  .cl-progress{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);margin-top:10px;}
+  /* IDEA BANK */
+  .idea-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px;text-align:center;}
+  .idea-eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);margin-bottom:10px;}
+  .idea-text{font-size:16px;line-height:1.5;margin-bottom:18px;min-height:48px;}
+  .idea-actions{display:flex;gap:10px;justify-content:center;}
+  .btn{background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:7px;padding:9px 16px;font-size:13px;}
+  .btn:hover{border-color:var(--teal);}
+  .btn.primary{background:var(--teal-dim);border-color:var(--teal);color:var(--teal);}
+  .saved-ideas{margin-top:16px;display:flex;flex-direction:column;gap:6px;}
+  .saved-idea{font-size:12.5px;color:var(--muted);background:var(--surface2);padding:8px 12px;border-radius:6px;display:flex;justify-content:space-between;gap:10px;}
+  .saved-idea button{background:none;border:none;color:var(--faint);font-size:14px;}
+  /* INCOME */
+  .income-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .income-item{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .income-item .iname{font-size:13px;}
+  .toggle{width:38px;height:22px;border-radius:11px;background:var(--surface2);border:1px solid var(--line);position:relative;cursor:pointer;flex-shrink:0;}
+  .toggle .knob{width:16px;height:16px;border-radius:50%;background:var(--faint);position:absolute;top:2px;left:2px;transition:all 0.15s ease;}
+  .toggle.on{background:var(--gold-dim);border-color:var(--gold);}
+  .toggle.on .knob{left:18px;background:var(--gold);}
+  footer{border-top:1px solid var(--line);padding-top:18px;color:var(--faint);font-size:12px;}
+  @media(max-width:640px){
+    .orbit{flex-direction:column;}
+    .phase{margin-right:0;margin-bottom:14px;}
+    .income-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Ustozlik platformasi</div>
+    <h1 id="brandName">AI O'sish Laboratoriyasi</h1>
+    <p class="tag">Motivatsiya emas — amaliy foyda beruvchi kanal. AI + Pul topish + Shaxsiy rivojlanish + Biznes + Psixologiya niliasidagi 270 kunlik sprint uchun boshqaruv paneli.</p>
+    <div class="daycount">
+      <span class="num" id="dayNum">1</span>
+      <span class="lbl">— sprintning shu kuni (jami 270 kundan)</span>
+    </div>
+    <div class="setup-row">
+      <label>Boshlanish sanasi:</label>
+      <input type="date" id="startDate">
+      <label style="margin-left:8px;">Brend nomi:</label>
+      <input type="text" id="brandInput" placeholder="AI O'sish Laboratoriyasi" style="width:220px;">
+    </div>
+  </div>
+
+  <section>
+    <div class="sec-head">
+      <h2>90 kunlik uchta bosqich</h2>
+      <span class="sec-note">Sanani kiritsangiz, faol bosqich avtomatik belgilanadi</span>
+    </div>
+    <div class="orbit" id="orbit"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Kontent ustunlari</h2>
+      <span class="sec-note">Bosing — misol mavzularni ko'rish uchun</span>
+    </div>
+    <div class="pillar-list" id="pillarList"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Kunlik ish jarayoni</h2>
+      <span class="sec-note">Bitta Shorts — 20&ndash;30 daqiqa</span>
+    </div>
+    <div class="checklist" id="checklist"></div>
+    <div class="cl-progress" id="clProgress"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>G'oya banki</h2>
+      <span class="sec-note">Tugmani bosib yangi hook + mavzu oling</span>
+    </div>
+    <div class="idea-card">
+      <div class="idea-eyebrow" id="ideaPillar">AI BILAN PUL TOPISH</div>
+      <div class="idea-text" id="ideaText">Tugmani bosing va birinchi g'oyangizni oling.</div>
+      <div class="idea-actions">
+        <button class="btn primary" id="newIdeaBtn">Yangi g'oya</button>
+        <button class="btn" id="saveIdeaBtn">Saqlash</button>
+      </div>
+    </div>
+    <div class="saved-ideas" id="savedIdeas"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Daromad manbalari</h2>
+      <span class="sec-note">Qaysilari hozir faol, qaysilari rejada</span>
+    </div>
+    <div class="income-grid" id="incomeGrid"></div>
+  </section>
+
+  <footer>
+    Ma'lumotlar shu qurilmada saqlanadi. Har kuni ochib, checklistni to'ldirib boring — 270 kun davomida izchillik natijani beradi.
+  </footer>
+
+</div>
+
+<script>
+const PHASES = [
+  {label:"1-bosqich", days:[1,90], shortsGoal:90, videoGoal:4, subGoal:1000},
+  {label:"2-bosqich", days:[91,180], shortsGoal:90, videoGoal:4, subGoal:10000},
+  {label:"3-bosqich", days:[181,270], shortsGoal:90, videoGoal:8, subGoal:null, subLabel:"kuchli baza"}
+];
+
+const PILLARS = [
+  {name:"AI bilan pul topish", pct:35, topics:["ChatGPT bilan oyiga $100 topish","AI yordamida freelancing","AI avtomatlashtirish loyihalari","Sun'iy intellekt agentlari yaratish","AI biznes g'oyalari"]},
+  {name:"Pul topish usullari", pct:25, topics:["Onlayn biznes boshlash","YouTube orqali daromad","Hamkorlik marketingi","Freelancerlik yo'nalishlari","Raqamli mahsulot sotish","Passiv daromad manbalari"]},
+  {name:"Motivatsiya va intizom", pct:20, topics:["Boy odamlarning kunlik odatlari","Erta turish va reja tuzish tizimi","Chalg'ituvchi omillarni yo'qotish","Kichik qadamlar — katta natija"]},
+  {name:"Psixologiya", pct:10, topics:["Boylarning fikrlash tarzi","Tez va aniq qaror qabul qilish","Vaqtni boshqarish texnikalari","Yangi odat shakllantirish"]},
+  {name:"Biznes hikoyalari", pct:10, topics:["Elon Musk — muvaffaqiyat tahlili","Jeff Bezos — Amazon sirlari","Uorren Baffet — investitsiya darsi","Sem Altman — AI davri yetakchisi"]},
+];
+
+const DAILY_STEPS = ["G'oya topish","Ssenariy yozish","AI ovoz yaratish","Montaj","Subtitr qo'shish","SEO (sarlavha, tavsif, teglar)","Yuklash"];
+
+const HOOKS = [
+  "99% odam bu xatoni qiladi —",
+  "Bu 1 ta AI vositasi hayotimni o'zgartirdi —",
+  "Pulsiz boshlab, 30 kunda natija oldim —",
+  "Hech kim senga buni aytmaydi —",
+  "5 daqiqada o'rganadigan, umrbod ishlaydigan usul —",
+  "Boy odamlar buni har kuni qiladi —",
+  "Men ham ishonmagandim, keyin sinab ko'rdim —",
+];
+
+const INCOME_SOURCES = ["YouTube reklama daromadi","Hamkorlik marketingi","AI kurslari","Shaxsiy kurslar","Konsultatsiya","Telegram premium kanal","AI avtomatlashtirish xizmati"];
+
+async function sget(key, fallback){
+  try{
+    const r = await window.storage.get(key, false);
+    return r ? JSON.parse(r.value) : fallback;
+  }catch(e){ return fallback; }
+}
+async function sset(key, val){
+  try{ await window.storage.set(key, JSON.stringify(val), false); }catch(e){}
+}
+
+function todayKey(){
+  const d = new Date();
+  return d.toISOString().slice(0,10);
+}
+
+function daysBetween(a,b){
+  return Math.floor((b-a)/(1000*60*60*24))+1;
+}
+
+let state = {
+  startDate: null,
+  brand: "AI O'sish Laboratoriyasi",
+  phaseData: [{shorts:0,videos:0,subs:0},{shorts:0,videos:0,subs:0},{shorts:0,videos:0,subs:0}],
+  income: {},
+  savedIdeas: [],
+};
+
+let currentIdea = null;
+
+async function loadState(){
+  state.startDate = await sget('startDate', null);
+  state.brand = await sget('brand', "AI O'sish Laboratoriyasi");
+  state.phaseData = await sget('phaseData', state.phaseData);
+  state.income = await sget('income', {});
+  state.savedIdeas = await sget('savedIdeas', []);
+}
+
+function currentDay(){
+  if(!state.startDate) return 1;
+  const start = new Date(state.startDate);
+  const now = new Date();
+  const d = daysBetween(start, now);
+  return d < 1 ? 1 : d;
+}
+
+function activePhaseIndex(day){
+  for(let i=0;i<PHASES.length;i++){
+    if(day >= PHASES[i].days[0] && day <= PHASES[i].days[1]) return i;
+  }
+  return day > 270 ? 2 : 0;
+}
+
+function renderHero(){
+  document.getElementById('brandName').textContent = state.brand || "AI O'sish Laboratoriyasi";
+  document.getElementById('dayNum').textContent = currentDay();
+  if(state.startDate) document.getElementById('startDate').value = state.startDate;
+  document.getElementById('brandInput').value = state.brand;
+}
+
+function renderOrbit(){
+  const day = currentDay();
+  const activeIdx = activePhaseIndex(day);
+  const orbit = document.getElementById('orbit');
+  orbit.innerHTML = '';
+  PHASES.forEach((p, i) => {
+    const pd = state.phaseData[i];
+    const dayInPhase = Math.min(Math.max(day - p.days[0] + 1, 0), 90);
+    const dayPct = Math.max(0, Math.min(100, Math.round((dayInPhase/90)*100)));
+    const shortsPct = Math.min(100, Math.round((pd.shorts/p.shortsGoal)*100));
+    const videoPct = Math.min(100, Math.round((pd.videos/p.videoGoal)*100));
+    const subGoalLabel = p.subGoal ? p.subGoal.toLocaleString() : p.subLabel;
+    const subPct = p.subGoal ? Math.min(100, Math.round((pd.subs/p.subGoal)*100)) : 0;
+
+    const el = document.createElement('div');
+    el.className = 'phase' + (i===activeIdx ? ' phase-active' : '');
+    el.innerHTML = `
+      <div class="pnum">${p.days[0]}&ndash;${p.days[1]}-kun</div>
+      <h3>${p.label}</h3>
+      <div class="goal">${p.videoGoal} uzun video · ${p.shortsGoal} shorts · ${subGoalLabel} obunachi</div>
+
+      <div class="bar-row">
+        <div class="blabel"><span>Kun</span><span>${dayInPhase}/90</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${dayPct}%"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="blabel"><span>Shorts</span><span>${pd.shorts}/${p.shortsGoal}</span></div>
+        <div class="bar-track"><div class="bar-fill gold" style="width:${shortsPct}%"></div></div>
+        <div class="stepper">
+          <button data-act="shorts-dec" data-idx="${i}">−</button>
+          <span class="val">${pd.shorts} ta</span>
+          <button data-act="shorts-inc" data-idx="${i}">+</button>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="blabel"><span>Uzun video</span><span>${pd.videos}/${p.videoGoal}</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${videoPct}%"></div></div>
+        <div class="stepper">
+          <button data-act="video-dec" data-idx="${i}">−</button>
+          <span class="val">${pd.videos} ta</span>
+          <button data-act="video-inc" data-idx="${i}">+</button>
+        </div>
+      </div>
+      ${p.subGoal ? `
+      <div class="bar-row">
+        <div class="blabel"><span>Obunachi</span><span>${pd.subs}/${p.subGoal}</span></div>
+        <div class="bar-track"><div class="bar-fill gold" style="width:${subPct}%"></div></div>
+        <div class="stepper">
+          <input type="number" data-act="subs-set" data-idx="${i}" value="${pd.subs}" style="width:80px;">
+        </div>
+      </div>` : ''}
+    `;
+    orbit.appendChild(el);
+  });
+
+  orbit.querySelectorAll('button[data-act]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const idx = parseInt(btn.dataset.idx);
+      const act = btn.dataset.act;
+      if(act==='shorts-inc') state.phaseData[idx].shorts++;
+      if(act==='shorts-dec') state.phaseData[idx].shorts = Math.max(0, state.phaseData[idx].shorts-1);
+      if(act==='video-inc') state.phaseData[idx].videos++;
+      if(act==='video-dec') state.phaseData[idx].videos = Math.max(0, state.phaseData[idx].videos-1);
+      await sset('phaseData', state.phaseData);
+      renderOrbit();
+    });
+  });
+  orbit.querySelectorAll('input[data-act=subs-set]').forEach(inp => {
+    inp.addEventListener('change', async () => {
+      const idx = parseInt(inp.dataset.idx);
+      state.phaseData[idx].subs = Math.max(0, parseInt(inp.value)||0);
+      await sset('phaseData', state.phaseData);
+      renderOrbit();
+    });
+  });
+}
+
+function renderPillars(){
+  const list = document.getElementById('pillarList');
+  list.innerHTML = '';
+  PILLARS.forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'pillar';
+    el.innerHTML = `
+      <div class="pillar-top">
+        <span class="pname">${p.name}</span>
+        <span class="ppct">${p.pct}%</span>
+      </div>
+      <div class="ptrack"><div class="pfill" style="width:${p.pct*2}%"></div></div>
+      <div class="pdetail"><ul>${p.topics.map(t=>`<li>${t}</li>`).join('')}</ul></div>
+    `;
+    el.addEventListener('click', () => el.classList.toggle('open'));
+    list.appendChild(el);
+  });
+}
+
+async function renderChecklist(){
+  const key = 'tasks:' + todayKey();
+  const done = await sget(key, []);
+  const cl = document.getElementById('checklist');
+  cl.innerHTML = '';
+  DAILY_STEPS.forEach((step, i) => {
+    const isDone = done.includes(i);
+    const el = document.createElement('div');
+    el.className = 'cl-item' + (isDone ? ' done' : '');
+    el.innerHTML = `<input type="checkbox" ${isDone?'checked':''} data-i="${i}"><span class="clname">${step}</span>`;
+    el.querySelector('input').addEventListener('change', async (e) => {
+      let d = await sget(key, []);
+      if(e.target.checked){ if(!d.includes(i)) d.push(i); }
+      else { d = d.filter(x=>x!==i); }
+      await sset(key, d);
+      renderChecklist();
+    });
+    cl.appendChild(el);
+  });
+  document.getElementById('clProgress').textContent = `Bugun: ${done.length}/${DAILY_STEPS.length} bosqich bajarildi`;
+}
+
+function pickIdea(){
+  const hook = HOOKS[Math.floor(Math.random()*HOOKS.length)];
+  const pillar = PILLARS[Math.floor(Math.random()*PILLARS.length)];
+  const topic = pillar.topics[Math.floor(Math.random()*pillar.topics.length)];
+  return {pillar: pillar.name, text: `${hook} ${topic}`};
+}
+
+function renderIdea(){
+  document.getElementById('ideaPillar').textContent = currentIdea.pillar.toUpperCase();
+  document.getElementById('ideaText').textContent = currentIdea.text;
+}
+
+function renderSavedIdeas(){
+  const box = document.getElementById('savedIdeas');
+  box.innerHTML = '';
+  state.savedIdeas.forEach((idea, i) => {
+    const el = document.createElement('div');
+    el.className = 'saved-idea';
+    el.innerHTML = `<span>${idea.text}</span><button data-i="${i}" aria-label="O'chirish">&times;</button>`;
+    el.querySelector('button').addEventListener('click', async () => {
+      state.savedIdeas.splice(i,1);
+      await sset('savedIdeas', state.savedIdeas);
+      renderSavedIdeas();
+    });
+    box.appendChild(el);
+  });
+}
+
+function renderIncome(){
+  const grid = document.getElementById('incomeGrid');
+  grid.innerHTML = '';
+  INCOME_SOURCES.forEach((name) => {
+    const on = !!state.income[name];
+    const el = document.createElement('div');
+    el.className = 'income-item';
+    el.innerHTML = `<span class="iname">${name}</span><div class="toggle ${on?'on':''}"><div class="knob"></div></div>`;
+    el.querySelector('.toggle').addEventListener('click', async () => {
+      state.income[name] = !state.income[name];
+      await sset('income', state.income);
+      renderIncome();
+    });
+    grid.appendChild(el);
+  });
+}
+
+document.getElementById('startDate').addEventListener('change', async (e) => {
+  state.startDate = e.target.value;
+  await sset('startDate', state.startDate);
+  renderHero();
+  renderOrbit();
+});
+document.getElementById('brandInput').addEventListener('change', async (e) => {
+  state.brand = e.target.value || "AI O'sish Laboratoriyasi";
+  await sset('brand', state.brand);
+  renderHero();
+});
+document.getElementById('newIdeaBtn').addEventListener('click', () => {
+  currentIdea = pickIdea();
+  renderIdea();
+});
+document.getElementById('saveIdeaBtn').addEventListener('click', async () => {
+  if(!currentIdea) return;
+  state.savedIdeas.unshift(currentIdea);
+  state.savedIdeas = state.savedIdeas.slice(0,12);
+  await sset('savedIdeas', state.savedIdeas);
+  renderSavedIdeas();
+});
+
+(async function init(){
+  await loadState();
+  if(!state.startDate){
+    state.startDate = todayKey();
+    await sset('startDate', state.startDate);
+  }
+  renderHero();
+  renderOrbit();
+  renderPillars();
+  await renderChecklist();
+  currentIdea = pickIdea();
+  renderIdea();
+  renderSavedIdeas();
+  renderIncome();
+})();
+</script>
+</body>
+</html>
